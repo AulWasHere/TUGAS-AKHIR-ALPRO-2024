@@ -1,0 +1,65 @@
+  btn_tampilkan_data_history = tk.Button(root, text="Tampilkan history delete", command=show_history_deleted, font=('Arial', 12, 'bold'), fg='white', bg='#7FC7D9')
+  btn_tampilkan_data_history.pack(pady=10)
+
+#line code program ini berfungsi sebagai button dan menampilkan data dari database kelompok table 'stok_barang' yang di Delete ke table 'history_deleted'
+
+
+def show_history_deleted():
+    cursor = connection.cursor()
+    cursor.execute("SELECT * FROM history_deleted")
+    result = cursor.fetchall()
+
+    if not result:
+        messagebox.showinfo("Info", "Belum ada data barang.")
+    else:
+        data = "\n==== HISTORY DELETED ====\n"
+        for row in result:
+            data += f"ID: {row[0]}, Nama Barang: {row[1]}, Jumlah: {row[2]}, Harga: {row[3]}\n"
+        messagebox.showinfo("Data Barang", data)
+
+#line code program ini berfungsi sebagai keluaran dari  "btn_tampilkan_data_history" melalui fitur msgbox
+
+
+def delete_barang(id):
+    # Create a new cursor object
+    cursor = connection.cursor()
+
+    # Fetch the record to be deleted
+    cursor.execute("SELECT * FROM stok_barang WHERE id = %s", (id,))
+    deleted_record = cursor.fetchone()
+
+    # Check if the record exists
+    if deleted_record:
+        # Execute the DELETE SQL statement
+        cursor.execute("DELETE FROM stok_barang WHERE id = %s", (id,))
+
+        # Insert the deleted record into the 'history_deleted' table
+        cursor.execute("INSERT INTO history_deleted (id, nama_barang, jumlah, harga) VALUES (%s, %s, %s, %s)",
+                       (deleted_record[0], deleted_record[1], deleted_record[2], deleted_record[3]))
+
+        # Commit the changes to the database
+        connection.commit()
+
+    # Close the cursor
+    cursor.close()
+
+#Line code program bagian delete_barang berfungsi sebagai merekam table 'stok_barang' yang di hapus, dan menggunakna SELECT INSERT untuk memasukan data ke dalam table 'history_deleted'
+
+
+def on_enter_username(e):
+    user.delete(0, 'end')
+
+def on_leave_username(e):
+    if not user.get():
+        user.insert(0, 'Username')
+
+def on_enter_password(e):
+    code.delete(0, 'end')
+    code.config(show='*')  # Menyembunyikan karakter password saat diketik
+
+def on_leave_password(e):
+    if not code.get():
+        code.insert(0, 'password')
+        code.config(show='')  # Menampilkan teks normal saat tidak ada input pada password
+
+#Line code ini berfungsi ketika di halaman login user mengetuk bagan username atau Password, otomatis String text 'username' atau 'password' akan menghilang secara otomatis ketika diketuk salah satu nya 
